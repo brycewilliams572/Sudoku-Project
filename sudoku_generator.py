@@ -7,6 +7,7 @@ https://www.geeksforgeeks.org/program-sudoku-generator/
 """
 
 class SudokuGenerator:
+
     '''
 	create a sudoku board - initialize class variables and set up the 2D board
 	This should initialize:
@@ -32,7 +33,7 @@ class SudokuGenerator:
 	Return: list[list]
     '''
     def get_board(self):
-        pass
+        return self.board
 
     '''
 	Displays the board to the console
@@ -42,7 +43,8 @@ class SudokuGenerator:
 	Return: None
     '''
     def print_board(self):
-        pass
+        for row in self.board:
+            print(row)
 
     '''
 	Determines if num is contained in the specified row (horizontal) of the board
@@ -55,7 +57,9 @@ class SudokuGenerator:
 	Return: boolean
     '''
     def valid_in_row(self, row, num):
-        pass
+        if num in self.board[row]:
+            return False
+        return True
 
     '''
 	Determines if num is contained in the specified column (vertical) of the board
@@ -68,7 +72,10 @@ class SudokuGenerator:
 	Return: boolean
     '''
     def valid_in_col(self, col, num):
-        pass
+        for row in self.board:
+            if row[col] == num:
+                return False
+        return True
 
     '''
 	Determines if num is contained in the 3x3 box specified on the board
@@ -83,7 +90,12 @@ class SudokuGenerator:
 	Return: boolean
     '''
     def valid_in_box(self, row_start, col_start, num):
-        pass
+        for row in range(row_start, row_start + 3):
+            for col in range (col_start, col_start + 3):
+                if self.board[row][col] == num:
+                    return False
+        return True
+
     
     '''
     Determines if it is valid to enter num at (row, col) in the board
@@ -95,6 +107,15 @@ class SudokuGenerator:
 
 	Return: boolean
     '''
+
+    def unused_in_box(self, row_start, col_start):
+        used = set()
+        for row in range(row_start, row_start + 3):
+            for col in range(col_start, col_start + 3):
+                if self.board[row][col] != 0:
+                    used.add(self.board[row][col])
+        return used
+
     def is_valid(self, row, col, num):
         pass
 

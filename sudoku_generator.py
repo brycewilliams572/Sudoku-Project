@@ -26,7 +26,8 @@ class SudokuGenerator:
     def __init__(self, row_length, removed_cells):
         self.row_length = row_length
         self.removed_cells = removed_cells
-        self.board = [[0 for i in range(row_length)] for j in range(row_length)]
+        self.board = [[0 for _ in range(row_length)] for _ in range(row_length)]
+        self.box_length = int(math.sqrt(row_length))
 
     '''
 	Returns a 2D python list of numbers which represents the board
@@ -119,8 +120,6 @@ class SudokuGenerator:
         return used
 
     def is_valid(self, row, col, num):
-        if self.board[row][col] != 0:
-            return False
         if not self.valid_in_row(row, num):
             return False
         if not self.valid_in_col(col, num):

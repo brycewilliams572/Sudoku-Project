@@ -236,6 +236,81 @@ class SudokuGenerator:
                 self.board[row][col] = 0
                 removed += 1
 
+
+
+import pygame
+class Cell:
+    def __init__(self, value, row, col, screen):
+        """
+        Constructor for the Cell class
+
+        Args:
+            value: The initial value of the cell (0 if empty)
+            row: The row index of the cell
+            col: The column index of the cell
+            screen: The pygame screen object to draw on
+        """
+        self.value = value
+        self.row = row
+        self.col = col
+        self.screen = screen
+        self.sketched_value = 0
+        self.selected = False
+
+        # Cell dimensions (adjust these based on your board size)
+        self.cell_size = 60
+        self.x = col * self.cell_size
+        self.y = row * self.cell_size
+
+    def set_cell_value(self, value):
+        """
+        Setter for this cell's value
+
+        Args:
+            value: The value to set (1-9 or 0 for empty)
+        """
+        self.value = value
+
+    def set_sketched_value(self, value):
+        """
+        Setter for this cell's sketched value
+
+        Args:
+            value: The sketched value to set (1-9 or 0 for none)
+        """
+        self.sketched_value = value
+
+    def draw(self):
+        """
+        Draws this cell, along with the value inside it.
+        If this cell has a nonzero value, that value is displayed.
+        Otherwise, no value is displayed in the cell.
+        The cell is outlined red if it is currently selected.
+        """
+        # Draw cell background
+        pygame.draw.rect(self.screen, (255, 255, 255),
+                         (self.x, self.y, self.cell_size, self.cell_size))
+
+        # Draw cell border (red if selected, black otherwise)
+        border_color = (255, 0, 0) if self.selected else (0, 0, 0)
+        border_width = 3 if self.selected else 1
+        pygame.draw.rect(self.screen, border_color,
+                         (self.x, self.y, self.cell_size, self.cell_size), border_width)
+
+        # Draw the value if it's nonzero
+        if self.value != 0:
+            font = pygame.font.Font(None, 50)
+            text = font.render(str(self.value), True, (0, 0, 0))
+            text_rect = text.get_rect(center=(self.x + self.cell_size // 2,
+                                              self.y + self.cell_size // 2))
+            self.screen.blit(text, text_rect)
+
+        # Draw sketched value in the corner if it exists and no permanent value is set
+        elif self.sketched_value != 0:
+            font = pygame.font.Font(None, 25)
+            text = font.render(str(self.sketched_value), True, (128, 128, 128))
+            self.screen.blit(text, (self.x + 5, self.y + 5))
+
 '''
 DO NOT CHANGE
 Provided for students
@@ -258,3 +333,4 @@ def generate_sudoku(size, removed):
     sudoku.remove_cells()
     board = sudoku.get_board()
     return board
+

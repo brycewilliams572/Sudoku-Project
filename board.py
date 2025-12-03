@@ -1,4 +1,5 @@
 import pygame
+from sudoku_generator import SudokuGenerator
 
 
 pygame.init()
@@ -46,6 +47,9 @@ class Board:
        self.width = width
        self.height = height
        self.window = window
+       self.puzzle = None
+       self.solution = None
+
    def select(self):
        x, y = pygame.mouse.get_pos()
        self.x = x
@@ -57,15 +61,72 @@ class Board:
        #difficulty select
        if self.window == 1 and 10 <= x <= 196 and 610 <= y <= 700:
            pygame.display.quit()
+
+           gen = SudokuGenerator(9, 30)
+           gen.fill_values()
+           solution = [row[:] for row in gen.get_board()]
+
+           gen.remove_cells()
+           puzzle = gen.get_board()
+
            game_board = Board(603, 810, 21)
+           game_board.puzzle = puzzle
+           game_board.solution = solution
+
+           # Copy puzzle → array (change 0 to "")
+           for r in range(9):
+               for c in range(9):
+                   if puzzle[r][c] == 0:
+                       array[r][c] = ""
+                   else:
+                       array[r][c] = puzzle[r][c]
+
            game_board.screen()
        elif self.window == 1 and 206 <= x <= 397 and 610 <= y <= 700:
            pygame.display.quit()
+
+           gen = SudokuGenerator(9, 40)
+           gen.fill_values()
+           solution = [row[:] for row in gen.get_board()]
+
+           gen.remove_cells()
+           puzzle = gen.get_board()
+
            game_board = Board(603, 810, 22)
+           game_board.puzzle = puzzle
+           game_board.solution = solution
+
+           # Copy puzzle → array (change 0 to "")
+           for r in range(9):
+               for c in range(9):
+                   if puzzle[r][c] == 0:
+                       array[r][c] = ""
+                   else:
+                       array[r][c] = puzzle[r][c]
+
            game_board.screen()
        elif self.window == 1 and 407 <= x <= 593 and 610 <= y <= 700:
            pygame.display.quit()
+
+           gen = SudokuGenerator(9, 50)
+           gen.fill_values()
+           solution = [row[:] for row in gen.get_board()]
+
+           gen.remove_cells()
+           puzzle = gen.get_board()
+
            game_board = Board(603, 810, 23)
+           game_board.puzzle = puzzle
+           game_board.solution = solution
+
+           # Copy puzzle → array (change 0 to "")
+           for r in range(9):
+               for c in range(9):
+                   if puzzle[r][c] == 0:
+                       array[r][c] = ""
+                   else:
+                       array[r][c] = puzzle[r][c]
+
            game_board.screen()
 
 
@@ -75,23 +136,38 @@ class Board:
        elif self.window == 21 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
            for r in range(9):
                for c in range(9):
-                   array[r][c] = ""
+                   if self.puzzle[r][c] == 0:
+                       array[r][c] = ""
+                   else:
+                       array[r][c] = self.puzzle[r][c]
            pygame.display.quit()
            game_board = Board(603, 810, 21)
+           game_board.puzzle = self.puzzle
+           game_board.solution = self.solution
            game_board.screen()
        elif self.window == 22 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
            for r in range(9):
                for c in range(9):
-                   array[r][c] = ""
+                   if self.puzzle[r][c] == 0:
+                       array[r][c] = ""
+                   else:
+                       array[r][c] = self.puzzle[r][c]
            pygame.display.quit()
            game_board = Board(603, 810, 22)
+           game_board.puzzle = self.puzzle
+           game_board.solution = self.solution
            game_board.screen()
        elif self.window == 23 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
            for r in range(9):
                for c in range(9):
-                   array[r][c] = ""
+                   if self.puzzle[r][c] == 0:
+                       array[r][c] = ""
+                   else:
+                       array[r][c] = self.puzzle[r][c]
            pygame.display.quit()
            game_board = Board(603, 810, 23)
+           game_board.puzzle = self.puzzle
+           game_board.solution = self.solution
            game_board.screen()
 
 
@@ -119,6 +195,15 @@ class Board:
            game_board.screen()
 
 
+        #game won exit
+       if self.window == 3 and 285 <= x <= 525 and 610 <= y <= 700:
+           pygame.quit()
+       #game lost restart
+       elif self.window == 4 and 285 <= x <= 525 and 610 <= y <= 700:
+           pygame.display.quit()
+           game_board = Board(603, 810, 1)
+           game_board.screen()
+
    def click(self, x, y):
        self.col = (x // 67) + 1
        self.row = (y//67)+1
@@ -143,6 +228,26 @@ class Board:
                    count += 1
        if count == 81:
            print("board is filled")
+           return True
+       return False
+
+   def check_win_loss(self):
+       full = self.check_full()
+       wrong = False
+
+       if full:
+           for r in range(9):
+               for c in range (9):
+                   if array[r][c] != self.solution[r][c]:
+                       wrong = True
+                       break
+                   if wrong == True:
+                       break
+       if full and not wrong:
+           return "win"
+       if full and wrong:
+           return "loss"
+       return "continue"
 
 
    def clear(self):
@@ -306,6 +411,17 @@ class Board:
            screen.blit(text_surface_reset, text_rect_reset)
            screen.blit(text_surface_restart, text_rect_restart)
            screen.blit(text_surface_exit_2, text_rect_exit_2)
+
+           font_board = pygame.font.SysFont("Arial", 32)
+           for r in range(9):
+               for c in range(9):
+                   if array[r][c] != "":
+                       px = c * 67 + 33
+                       py = r * 67 + 33
+                       text = font_board.render(str(array[r][c]), True, "black")
+                       rect = text.get_rect(center=(px, py))
+                       screen.blit(text, rect)
+
            while running:
                for event in pygame.event.get():
                    if event.type == pygame.QUIT:
@@ -315,7 +431,9 @@ class Board:
                        if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
                            self.click(self.x, self.y)
 
-
+                           if self.puzzle[self.row - 1][self.col - 1] != 0:
+                               print("Cannot delete a puzzle number.")
+                               continue
                            if array[(self.row) - 1][(self.col) - 1] != '':
                                want_to_delete = input("do you want to delete, y/n: ")
                                if want_to_delete == "y":
@@ -323,12 +441,30 @@ class Board:
                                elif want_to_delete == "n":
                                    delete_val = False
                                if delete_val == True:
-                                   my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
+                                   px = (self.col - 1) * 67 + 33  # correct cell center X
+                                   py = (self.row - 1) * 67 + 33  # correct cell center Y
+                                   my_rectangle_clear = pygame.Rect(px - 20, py - 20, 50, 50)
                                    pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
                                    array[(self.row) - 1][(self.col) - 1] = ''
-                           elif array[(self.row)][self.col] == '':
+                           elif array[self.row - 1][self.col - 1] == '':
+
+
+
                                value = int(input("value: "))
+
                                self.place_number(value, self.col, self.row)
+                               array[self.row - 1][self.col - 1] = value
+
+                               result = self.check_win_loss()
+
+                               if result == "win":
+                                   pygame.display.quit()
+                                   Board(603, 810, 3).screen()
+
+                               elif result == "loss":
+                                   pygame.display.quit()
+                                   Board(603, 810, 4).screen()
+
 
 
                        elif self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
@@ -388,6 +524,17 @@ class Board:
            screen.blit(text_surface_restart, text_rect_restart)
            screen.blit(text_surface_exit_2, text_rect_exit_2)
            running = True
+
+           font_board = pygame.font.SysFont("Arial", 32)
+           for r in range(9):
+               for c in range(9):
+                   if array[r][c] != "":
+                       px = c * 67 + 33
+                       py = r * 67 + 33
+                       text = font_board.render(str(array[r][c]), True, "black")
+                       rect = text.get_rect(center=(px, py))
+                       screen.blit(text, rect)
+
            while running:
                for event in pygame.event.get():
                    if event.type == pygame.QUIT:
@@ -396,6 +543,9 @@ class Board:
                        self.select()
                        if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
                            self.click(self.x, self.y)
+                           if self.puzzle[self.row - 1][self.col - 1] != 0:
+                               print("Cannot delete a puzzle number.")
+                               continue
                            if array[(self.row) - 1][(self.col) - 1] != '':
 
 
@@ -405,12 +555,28 @@ class Board:
                                elif want_to_delete == "n":
                                    delete_val = False
                                if delete_val == True:
-                                   my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
+                                   px = (self.col - 1) * 67 + 33  # correct cell center X
+                                   py = (self.row - 1) * 67 + 33  # correct cell center Y
+                                   my_rectangle_clear = pygame.Rect(px - 20, py - 20, 50, 50)
                                    pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
                                    array[(self.row) - 1][(self.col) - 1] = ''
-                           elif array[(self.row)][self.col] == '':
+                           elif array[self.row - 1][self.col - 1] == '':
                                value = int(input("value: "))
+
                                self.place_number(value, self.col, self.row)
+                               array[self.row - 1][self.col - 1] = value
+
+                               result = self.check_win_loss()
+
+                               if result == "win":
+                                   pygame.display.quit()
+                                   Board(603, 810, 3).screen()
+
+                               elif result == "loss":
+                                   pygame.display.quit()
+                                   Board(603, 810, 4).screen()
+
+
                        elif self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
                            self.window_select(self.x, self.y)
                        elif self.x >= 407 and self.x <= 593 and self.y >= 680 and self.y <= 740:
@@ -466,6 +632,17 @@ class Board:
            screen.blit(text_surface_restart, text_rect_restart)
            screen.blit(text_surface_exit_2, text_rect_exit_2)
            running = True
+
+           font_board = pygame.font.SysFont("Arial", 32)
+           for r in range(9):
+               for c in range(9):
+                   if array[r][c] != "":
+                       px = c * 67 + 33
+                       py = r * 67 + 33
+                       text = font_board.render(str(array[r][c]), True, "black")
+                       rect = text.get_rect(center=(px, py))
+                       screen.blit(text, rect)
+
            while running:
                for event in pygame.event.get():
                    if event.type == pygame.QUIT:
@@ -474,6 +651,9 @@ class Board:
                        self.select()
                        if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
                            self.click(self.x, self.y)
+                           if self.puzzle[self.row - 1][self.col - 1] != 0:
+                               print("Cannot delete a puzzle number.")
+                               continue
                            if array[(self.row) - 1][(self.col) - 1] != '':
                                want_to_delete = input("do you want to delete, y/n: ")
                                if want_to_delete == "y":
@@ -481,12 +661,30 @@ class Board:
                                elif want_to_delete == "n":
                                    delete_val = False
                                if delete_val == True:
-                                   my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
+                                   px = (self.col - 1) * 67 + 33  # correct cell center X
+                                   py = (self.row - 1) * 67 + 33  # correct cell center Y
+                                   my_rectangle_clear = pygame.Rect(px - 20, py - 20, 50, 50)
                                    pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
                                    array[(self.row) - 1][(self.col) - 1] = ''
-                           elif array[(self.row)][self.col] == '':
+
+                           elif array[self.row - 1][self.col - 1] == '':
                                value = int(input("value: "))
+
                                self.place_number(value, self.col, self.row)
+                               array[self.row - 1][self.col - 1] = value
+                               # Check if correct number
+                               result = self.check_win_loss()
+
+                               if result == "win":
+                                   pygame.display.quit()
+                                   Board(603, 810, 3).screen()
+
+                               elif result == "loss":
+                                   pygame.display.quit()
+                                   Board(603, 810, 4).screen()
+
+
+
                        elif self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
                            self.window_select(self.x, self.y)
                        elif self.x >= 407 and self.x <= 593 and self.y >= 680 and self.y <= 740:
@@ -532,6 +730,12 @@ class Board:
            text_rect_2 = text_surface_2.get_rect()
            text_rect_2.center = (screen_width // 2, 655)
 
+           screen.fill("Light blue")
+           pygame.draw.rect(screen, (255, 69, 0), my_rectangle_exit_red)
+           pygame.draw.rect(screen, (255, 255, 255), my_rectangle_exit_white)
+           pygame.draw.rect(screen, "orange", my_rectangle_exit_orange)
+           screen.blit(text_surface, text_rect)
+           screen.blit(text_surface_2, text_rect_2)
 
            running = True
            while running:
@@ -540,12 +744,8 @@ class Board:
                        running = False
                    elif event.type == pygame.MOUSEBUTTONDOWN:
                        self.select()
-               screen.fill("Light blue")
-               pygame.draw.rect(screen, (255, 69, 0), my_rectangle_exit_red)
-               pygame.draw.rect(screen, (255, 255, 255), my_rectangle_exit_white)
-               pygame.draw.rect(screen, "orange", my_rectangle_exit_orange)
-               screen.blit(text_surface, text_rect)
-               screen.blit(text_surface_2, text_rect_2)
+                       self.window_select(self.x, self.y)
+
 
 
                pygame.display.update()
@@ -582,8 +782,12 @@ class Board:
            text_rect_2 = text_surface_2.get_rect()
            text_rect_2.center = (screen_width // 2, 655)
 
-
-
+           screen.fill("Light blue")
+           pygame.draw.rect(screen, (255, 69, 0), my_rectangle_exit_red)
+           pygame.draw.rect(screen, (255, 255, 255), my_rectangle_exit_white)
+           pygame.draw.rect(screen, "orange", my_rectangle_exit_orange)
+           screen.blit(text_surface, text_rect)
+           screen.blit(text_surface_2, text_rect_2)
 
            running = True
            while running:
@@ -592,15 +796,9 @@ class Board:
                        running = False
                    elif event.type == pygame.MOUSEBUTTONDOWN:
                        self.select()
-               screen.fill("Light blue")
-               pygame.draw.rect(screen, (255, 69, 0), my_rectangle_exit_red)
-               pygame.draw.rect(screen, (255, 255, 255), my_rectangle_exit_white)
-               pygame.draw.rect(screen, "orange", my_rectangle_exit_orange)
-               screen.blit(text_surface, text_rect)
-               screen.blit(text_surface_2, text_rect_2)
-
+                       self.window_select(self.x, self.y)
 
                pygame.display.update()
 
-
            clock.tick(60)
+

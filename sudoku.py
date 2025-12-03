@@ -1,5 +1,8 @@
+from board import Board
+
 def main():
-    pass
+    board = Board(703, 810, 1)
+    board.screen()
 
 if __name__ == '__main__':
     main()

@@ -317,9 +317,15 @@ class Board:
 
 
                            if array[(self.row) - 1][(self.col) - 1] != '':
-                               my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
-                               pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
-                               array[(self.row) - 1][(self.col) - 1] = ''
+                               want_to_delete = input("do you want to delete, y/n: ")
+                               if want_to_delete == "y":
+                                   delete_val = True
+                               elif want_to_delete == "n":
+                                   delete_val = False
+                               if delete_val == True:
+                                   my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
+                                   pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
+                                   array[(self.row) - 1][(self.col) - 1] = ''
                            elif array[(self.row)][self.col] == '':
                                value = int(input("value: "))
                                self.place_number(value, self.col, self.row)
@@ -391,9 +397,17 @@ class Board:
                        if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
                            self.click(self.x, self.y)
                            if array[(self.row) - 1][(self.col) - 1] != '':
-                               my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
-                               pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
-                               array[(self.row) - 1][(self.col) - 1] = ''
+
+
+                               want_to_delete = input("do you want to delete, y/n: ")
+                               if want_to_delete == "y":
+                                   delete_val = True
+                               elif want_to_delete == "n":
+                                   delete_val = False
+                               if delete_val == True:
+                                   my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
+                                   pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
+                                   array[(self.row) - 1][(self.col) - 1] = ''
                            elif array[(self.row)][self.col] == '':
                                value = int(input("value: "))
                                self.place_number(value, self.col, self.row)
@@ -461,9 +475,15 @@ class Board:
                        if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
                            self.click(self.x, self.y)
                            if array[(self.row) - 1][(self.col) - 1] != '':
-                               my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
-                               pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
-                               array[(self.row) - 1][(self.col) - 1] = ''
+                               want_to_delete = input("do you want to delete, y/n: ")
+                               if want_to_delete == "y":
+                                   delete_val = True
+                               elif want_to_delete == "n":
+                                   delete_val = False
+                               if delete_val == True:
+                                   my_rectangle_clear = pygame.Rect(self.x - 20, self.y - 20, 50, 50)
+                                   pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
+                                   array[(self.row) - 1][(self.col) - 1] = ''
                            elif array[(self.row)][self.col] == '':
                                value = int(input("value: "))
                                self.place_number(value, self.col, self.row)
@@ -584,17 +604,3 @@ class Board:
 
 
            clock.tick(60)
-
-
-
-
-
-
-
-
-
-
-
-
-board = Board(603, 810, 1)
-board.screen()

@@ -129,9 +129,6 @@ class Board:
 
            game_board.screen()
 
-
-
-
        # reset button
        elif self.window == 21 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
            for r in range(9):
@@ -145,6 +142,7 @@ class Board:
            game_board.puzzle = self.puzzle
            game_board.solution = self.solution
            game_board.screen()
+
        elif self.window == 22 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
            for r in range(9):
                for c in range(9):
@@ -157,6 +155,7 @@ class Board:
            game_board.puzzle = self.puzzle
            game_board.solution = self.solution
            game_board.screen()
+
        elif self.window == 23 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
            for r in range(9):
                for c in range(9):
@@ -220,6 +219,7 @@ class Board:
                    break
            if runns == False:
                break
+
    def check_full(self):
        count = 0
        for i in range(9):
@@ -231,6 +231,7 @@ class Board:
            return True
        return False
 
+    #returns win or loss depening on accuracy and if the board is full
    def check_win_loss(self):
        full = self.check_full()
        wrong = False
@@ -258,9 +259,6 @@ class Board:
        elif want_to_delete == "n":
            delete_val = False
            return delete_val
-
-
-
 
        #will clear a cell but only if the player filled in that square
    def sketch(self, value):

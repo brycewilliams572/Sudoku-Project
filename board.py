@@ -49,6 +49,8 @@ class Board:
        self.window = window
        self.puzzle = None
        self.solution = None
+       self.prev_row = None
+       self.prev_col = None
 
    def select(self):
        x, y = pygame.mouse.get_pos()
@@ -73,7 +75,7 @@ class Board:
            game_board.puzzle = puzzle
            game_board.solution = solution
 
-           # Copy puzzle → array (change 0 to "")
+           # changes puzzle to array, aka 0 to ""
            for r in range(9):
                for c in range(9):
                    if puzzle[r][c] == 0:
@@ -96,7 +98,7 @@ class Board:
            game_board.puzzle = puzzle
            game_board.solution = solution
 
-           # Copy puzzle → array (change 0 to "")
+           # changes puzzle to array, aka 0 to ""
            for r in range(9):
                for c in range(9):
                    if puzzle[r][c] == 0:
@@ -119,7 +121,7 @@ class Board:
            game_board.puzzle = puzzle
            game_board.solution = solution
 
-           # Copy puzzle → array (change 0 to "")
+           # changes puzzle to array, aka 0 to ""
            for r in range(9):
                for c in range(9):
                    if puzzle[r][c] == 0:
@@ -231,7 +233,7 @@ class Board:
            return True
        return False
 
-    #returns win or loss depening on accuracy and if the board is full
+    #returns win or loss depending on accuracy and if the board is full
    def check_win_loss(self):
        full = self.check_full()
        wrong = False
@@ -290,6 +292,18 @@ class Board:
 
        #takes the value from sketch to add the value where the user has clicked
 
+   def underline_cell(self, screen):
+       if self.row is None or self.col is None:
+           return
+
+       # coordinates of the cell
+       cell_x = (self.col - 1) * 67
+       cell_y = (self.row - 1) * 67
+
+       # draw a smaller underline under the number
+       start_pos = (cell_x + 15, cell_y + 58)
+       end_pos = (cell_x + 52, cell_y + 58)
+       pygame.draw.line(screen, "red", start_pos, end_pos, 2)
 
    def screen(self):
        #welcome screen
@@ -429,6 +443,20 @@ class Board:
                        if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
                            self.click(self.x, self.y)
 
+                           # clear previous underline if it exists
+                           if self.prev_row is not None and self.prev_col is not None:
+                               px = (self.prev_col - 1) * 67
+                               py = (self.prev_row - 1) * 67
+                               pygame.draw.line(screen, "light blue", (px + 15, py + 58), (px + 52, py + 58), 2)
+
+                           # update previous selection
+                           self.prev_row = self.row
+                           self.prev_col = self.col
+
+                           # draw underline under new selected cell
+                           self.underline_cell(screen)
+                           pygame.display.update()
+
                            if self.puzzle[self.row - 1][self.col - 1] != 0:
                                print("Cannot delete a puzzle number.")
                                continue
@@ -541,6 +569,20 @@ class Board:
                        self.select()
                        if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
                            self.click(self.x, self.y)
+
+                           # clear previous underline if it exists
+                           if self.prev_row is not None and self.prev_col is not None:
+                               px = (self.prev_col - 1) * 67
+                               py = (self.prev_row - 1) * 67
+                               pygame.draw.line(screen, "light blue", (px + 15, py + 58), (px + 52, py + 58), 2)
+
+                           # update previous selection
+                           self.prev_row = self.row
+                           self.prev_col = self.col
+
+                           # draw underline under new selected cell
+                           self.underline_cell(screen)
+                           pygame.display.update()
                            if self.puzzle[self.row - 1][self.col - 1] != 0:
                                print("Cannot delete a puzzle number.")
                                continue
@@ -649,6 +691,20 @@ class Board:
                        self.select()
                        if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
                            self.click(self.x, self.y)
+
+                           # clear previous underline if it exists
+                           if self.prev_row is not None and self.prev_col is not None:
+                               px = (self.prev_col - 1) * 67
+                               py = (self.prev_row - 1) * 67
+                               pygame.draw.line(screen, "light blue", (px + 15, py + 58), (px + 52, py + 58), 2)
+
+                           # update previous selection
+                           self.prev_row = self.row
+                           self.prev_col = self.col
+
+                           # draw underline under new selected cell
+                           self.underline_cell(screen)
+                           pygame.display.update()
                            if self.puzzle[self.row - 1][self.col - 1] != 0:
                                print("Cannot delete a puzzle number.")
                                continue

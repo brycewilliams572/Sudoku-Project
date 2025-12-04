@@ -1,9 +1,9 @@
-import pygame
+import pygame, sys
 from sudoku_generator import SudokuGenerator
 
 
 pygame.init()
-
+clicked = False
 
 row_1 = []
 array = []
@@ -58,6 +58,9 @@ class Board:
        self.y = y
        return self.x, self.y
 
+   def restart_game(self):
+       self.window = 1
+       self.screen()
 
    def window_select(self, x, y):
        #difficulty select
@@ -132,65 +135,30 @@ class Board:
            game_board.screen()
 
        # reset button
-       elif self.window == 21 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
+       elif self.window in (21,22,23) and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
            for r in range(9):
                for c in range(9):
-                   if self.puzzle[r][c] == 0:
-                       array[r][c] = ""
-                   else:
-                       array[r][c] = self.puzzle[r][c]
+                   array[r][c] = self.puzzle[r][c] if self.puzzle[r][c] != 0 else ""
            pygame.display.quit()
            game_board = Board(603, 810, 21)
            game_board.puzzle = self.puzzle
            game_board.solution = self.solution
            game_board.screen()
 
-       elif self.window == 22 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
-           for r in range(9):
-               for c in range(9):
-                   if self.puzzle[r][c] == 0:
-                       array[r][c] = ""
-                   else:
-                       array[r][c] = self.puzzle[r][c]
-           pygame.display.quit()
-           game_board = Board(603, 810, 22)
-           game_board.puzzle = self.puzzle
-           game_board.solution = self.solution
-           game_board.screen()
-
-       elif self.window == 23 and self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
-           for r in range(9):
-               for c in range(9):
-                   if self.puzzle[r][c] == 0:
-                       array[r][c] = ""
-                   else:
-                       array[r][c] = self.puzzle[r][c]
-           pygame.display.quit()
-           game_board = Board(603, 810, 23)
-           game_board.puzzle = self.puzzle
-           game_board.solution = self.solution
-           game_board.screen()
-
-
        #exit button
        elif self.window == 21 and self.x >= 407 and self.x <= 593 and self.y >= 680 and self.y <= 740:
            pygame.quit()
+           sys.exit()
        elif self.window == 22 and self.x >= 407 and self.x <= 593 and self.y >= 680 and self.y <= 740:
            pygame.quit()
+           sys.exit()
        elif self.window == 23 and self.x >= 407 and self.x <= 593 and self.y >= 680 and self.y <= 740:
            pygame.quit()
+           sys.exit()
 
 
        #restart/ return to main menu
-       elif self.window == 21 and self.x >= 206 and self.x <= 397 and self.y >= 680 and self.y <= 740:
-           pygame.display.quit()
-           game_board = Board(603, 810, 1)
-           game_board.screen()
-       elif self.window == 22 and self.x >= 206 and self.x <= 397 and self.y >= 680 and self.y <= 740:
-           pygame.display.quit()
-           game_board = Board(603, 810, 1)
-           game_board.screen()
-       elif self.window == 23 and self.x >= 206 and self.x <= 397 and self.y >= 680 and self.y <= 740:
+       elif self.window in (21, 22, 23) and 206 <= x <= 397 and 680 <= y <= 740:
            pygame.display.quit()
            game_board = Board(603, 810, 1)
            game_board.screen()
@@ -267,27 +235,26 @@ class Board:
        self. value = value
        return self.value
 
-
-
-
-
-
    def place_number(self, value, x, y):
-       array[y-1][x-1] = value
-       print(array)
-       for i in range(1, 10):
-           if i == x:
-               x = (x * 67) - 33
-       for j in range(1, 10):
-           if j == y:
-               y = (y * 67) - 33
-       pygame.display.set_caption("Pygame Text Example")
-       pygame.font.init()
-       font2 = pygame.font.SysFont("Arial", 25)
-       text_surface_number = font2.render(f"{value}", True, ("dark gray"))
-       text_rect_number = text_surface_number.get_rect()
-       text_rect_number.center = (x, y)
-       return self.screen.blit(text_surface_number, text_rect_number)
+       array[y - 1][x - 1] = value  # Update the array
+
+       # Pixel position of the center of the cell
+       px = (x - 1) * 67 + 33
+       py = (y - 1) * 67 + 33
+
+       # Draw a smaller rectangle behind the number to "erase" it
+       erase_rect = pygame.Rect(px - 15, py - 15, 30, 30)
+       pygame.draw.rect(self.screen, "light blue", erase_rect)
+
+       # Only draw number if value is not empty
+       if value != '':
+           pygame.font.init()
+           font = pygame.font.SysFont("Arial", 32)
+           text_surface = font.render(str(value), True, "dark gray")
+           text_rect = text_surface.get_rect(center=(px, py))
+           self.screen.blit(text_surface, text_rect)
+
+       pygame.display.update()
 
 
        #takes the value from sketch to add the value where the user has clicked
@@ -440,66 +407,102 @@ class Board:
                        running = False
                    elif event.type == pygame.MOUSEBUTTONDOWN:
                        self.select()
-                       if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
+                       x, y = self.x, self.y
+
+                       # send the click to window_select
+                       self.window_select(x, y)
+
+                       # Selection of Grid
+                       if 0 <= self.x <= 603 and 0 <= self.y <= 603:
                            self.click(self.x, self.y)
 
-                           # clear previous underline if it exists
+                           # remove old underline
                            if self.prev_row is not None and self.prev_col is not None:
                                px = (self.prev_col - 1) * 67
                                py = (self.prev_row - 1) * 67
-                               pygame.draw.line(screen, "light blue", (px + 15, py + 58), (px + 52, py + 58), 2)
+                               pygame.draw.line(screen, "light blue", (px + 15, py + 58),
+                                                (px + 52, py + 58), 2)
 
-                           # update previous selection
                            self.prev_row = self.row
                            self.prev_col = self.col
 
-                           # draw underline under new selected cell
                            self.underline_cell(screen)
+                   elif event.type == pygame.KEYDOWN:
+                       # Only allow numbers 1-9
+                       if event.key == pygame.K_1:
+                           self.sketch_value = 1
+                       elif event.key == pygame.K_2:
+                           self.sketch_value = 2
+                       elif event.key == pygame.K_3:
+                           self.sketch_value = 3
+                       elif event.key == pygame.K_4:
+                           self.sketch_value = 4
+                       elif event.key == pygame.K_5:
+                           self.sketch_value = 5
+                       elif event.key == pygame.K_6:
+                           self.sketch_value = 6
+                       elif event.key == pygame.K_7:
+                           self.sketch_value = 7
+                       elif event.key == pygame.K_8:
+                           self.sketch_value = 8
+                       elif event.key == pygame.K_9:
+                           self.sketch_value = 9
+                       elif event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
+                           self.sketch_value = ''  # Allow clearing a cell
+
+                       if event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
+                           #prevents from crashing if nothing is selected
+                           if getattr(self, "row", None) is None:
+                               self.row = 1
+                           if getattr(self, "col", None) is None:
+                               self.col = 1
+
+                           # deletes previous underline
+                           if self.prev_row is not None and self.prev_col is not None:
+                               old_px = (self.prev_col - 1) * 67
+                               old_py = (self.prev_row - 1) * 67
+                               pygame.draw.line(self.screen, "light blue", (old_px + 15, old_py + 58),
+                                                (old_px + 52, old_py + 58), 2)
+
+                           # update cursor position
+                           if event.key == pygame.K_UP:
+                               self.row = max(1, self.row - 1)
+                           elif event.key == pygame.K_DOWN:
+                               self.row = min(9, self.row + 1)
+                           elif event.key == pygame.K_LEFT:
+                               self.col = max(1, self.col - 1)
+                           elif event.key == pygame.K_RIGHT:
+                               self.col = min(9, self.col + 1)
+
+                           # new underline
+                           new_px = (self.col - 1) * 67
+                           new_py = (self.row - 1) * 67
+                           pygame.draw.line(self.screen, "red", (new_px + 15, new_py + 58), (new_px + 52, new_py + 58),
+                                            2)
+
+                           # update prev trackers
+                           self.prev_row = self.row
+                           self.prev_col = self.col
+
                            pygame.display.update()
-
-                           if self.puzzle[self.row - 1][self.col - 1] != 0:
-                               print("Cannot delete a puzzle number.")
-                               continue
-                           if array[(self.row) - 1][(self.col) - 1] != '':
-                               want_to_delete = input("do you want to delete, y/n: ")
-                               if want_to_delete == "y":
-                                   delete_val = True
-                               elif want_to_delete == "n":
-                                   delete_val = False
-                               if delete_val == True:
-                                   px = (self.col - 1) * 67 + 33  # correct cell center X
-                                   py = (self.row - 1) * 67 + 33  # correct cell center Y
-                                   my_rectangle_clear = pygame.Rect(px - 20, py - 20, 50, 50)
-                                   pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
-                                   array[(self.row) - 1][(self.col) - 1] = ''
-                           elif array[self.row - 1][self.col - 1] == '':
+                           continue
 
 
+                       # Place the number if a cell is selected
+                       if self.row is not None and self.col is not None:
+                           if self.puzzle[self.row - 1][
+                               self.col - 1] == 0:  # Only allow change if not a puzzle number
+                               array[self.row - 1][self.col - 1] = self.sketch_value
+                               self.place_number(self.sketch_value, self.col, self.row)
 
-                               value = int(input("value: "))
-
-                               self.place_number(value, self.col, self.row)
-                               array[self.row - 1][self.col - 1] = value
-
+                               # Check win/loss
                                result = self.check_win_loss()
-
                                if result == "win":
                                    pygame.display.quit()
                                    Board(603, 810, 3).screen()
-
                                elif result == "loss":
                                    pygame.display.quit()
                                    Board(603, 810, 4).screen()
-
-
-
-                       elif self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       elif self.x >= 407 and self.x <= 593 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       elif self.x >= 206 and self.x <= 397 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       pygame.display.update()
 
 
 
@@ -567,64 +570,101 @@ class Board:
                        running = False
                    elif event.type == pygame.MOUSEBUTTONDOWN:
                        self.select()
-                       if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
+                       x, y = self.x, self.y
+
+                       # send the click to window_select
+                       self.window_select(x, y)
+
+                       # Selection of Grid
+                       if 0 <= self.x <= 603 and 0 <= self.y <= 603:
                            self.click(self.x, self.y)
 
-                           # clear previous underline if it exists
+                           # remove old underline
                            if self.prev_row is not None and self.prev_col is not None:
                                px = (self.prev_col - 1) * 67
                                py = (self.prev_row - 1) * 67
-                               pygame.draw.line(screen, "light blue", (px + 15, py + 58), (px + 52, py + 58), 2)
+                               pygame.draw.line(screen, "light blue", (px + 15, py + 58),
+                                                (px + 52, py + 58), 2)
 
-                           # update previous selection
                            self.prev_row = self.row
                            self.prev_col = self.col
 
-                           # draw underline under new selected cell
                            self.underline_cell(screen)
+                   elif event.type == pygame.KEYDOWN:
+                       # Only allow numbers 1-9
+                       if event.key == pygame.K_1:
+                           self.sketch_value = 1
+                       elif event.key == pygame.K_2:
+                           self.sketch_value = 2
+                       elif event.key == pygame.K_3:
+                           self.sketch_value = 3
+                       elif event.key == pygame.K_4:
+                           self.sketch_value = 4
+                       elif event.key == pygame.K_5:
+                           self.sketch_value = 5
+                       elif event.key == pygame.K_6:
+                           self.sketch_value = 6
+                       elif event.key == pygame.K_7:
+                           self.sketch_value = 7
+                       elif event.key == pygame.K_8:
+                           self.sketch_value = 8
+                       elif event.key == pygame.K_9:
+                           self.sketch_value = 9
+                       elif event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
+                           self.sketch_value = ''  # Allow clearing a cell
+
+                       if event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
+                           #prevents from crashing if nothing is selected
+                           if getattr(self, "row", None) is None:
+                               self.row = 1
+                           if getattr(self, "col", None) is None:
+                               self.col = 1
+
+                           # deletes previous underline
+                           if self.prev_row is not None and self.prev_col is not None:
+                               old_px = (self.prev_col - 1) * 67
+                               old_py = (self.prev_row - 1) * 67
+                               pygame.draw.line(self.screen, "light blue", (old_px + 15, old_py + 58),
+                                                (old_px + 52, old_py + 58), 2)
+
+                           # update cursor position
+                           if event.key == pygame.K_UP:
+                               self.row = max(1, self.row - 1)
+                           elif event.key == pygame.K_DOWN:
+                               self.row = min(9, self.row + 1)
+                           elif event.key == pygame.K_LEFT:
+                               self.col = max(1, self.col - 1)
+                           elif event.key == pygame.K_RIGHT:
+                               self.col = min(9, self.col + 1)
+
+                           # new underline
+                           new_px = (self.col - 1) * 67
+                           new_py = (self.row - 1) * 67
+                           pygame.draw.line(self.screen, "red", (new_px + 15, new_py + 58), (new_px + 52, new_py + 58),
+                                            2)
+
+                           # update prev trackers
+                           self.prev_row = self.row
+                           self.prev_col = self.col
+
                            pygame.display.update()
-                           if self.puzzle[self.row - 1][self.col - 1] != 0:
-                               print("Cannot delete a puzzle number.")
-                               continue
-                           if array[(self.row) - 1][(self.col) - 1] != '':
+                           continue
 
+                       # Place the number if a cell is selected
+                       if self.row is not None and self.col is not None:
+                           if self.puzzle[self.row - 1][
+                               self.col - 1] == 0:  # Only allow change if not a puzzle number
+                               array[self.row - 1][self.col - 1] = self.sketch_value
+                               self.place_number(self.sketch_value, self.col, self.row)
 
-                               want_to_delete = input("do you want to delete, y/n: ")
-                               if want_to_delete == "y":
-                                   delete_val = True
-                               elif want_to_delete == "n":
-                                   delete_val = False
-                               if delete_val == True:
-                                   px = (self.col - 1) * 67 + 33  # correct cell center X
-                                   py = (self.row - 1) * 67 + 33  # correct cell center Y
-                                   my_rectangle_clear = pygame.Rect(px - 20, py - 20, 50, 50)
-                                   pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
-                                   array[(self.row) - 1][(self.col) - 1] = ''
-                           elif array[self.row - 1][self.col - 1] == '':
-                               value = int(input("value: "))
-
-                               self.place_number(value, self.col, self.row)
-                               array[self.row - 1][self.col - 1] = value
-
+                               # Check win/loss
                                result = self.check_win_loss()
-
                                if result == "win":
                                    pygame.display.quit()
                                    Board(603, 810, 3).screen()
-
                                elif result == "loss":
                                    pygame.display.quit()
                                    Board(603, 810, 4).screen()
-
-
-                       elif self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       elif self.x >= 407 and self.x <= 593 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       elif self.x >= 206 and self.x <= 397 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       pygame.display.update()
-
 
                pygame.display.update()
            clock.tick(60)
@@ -689,70 +729,105 @@ class Board:
                        running = False
                    elif event.type == pygame.MOUSEBUTTONDOWN:
                        self.select()
-                       if self.x >= 0 and self.x <= 603 and self.y >= 0 and self.y <= 603:
+                       x, y = self.x, self.y
+
+                       # send the click to window_select
+                       self.window_select(x, y)
+
+                       # Selection of Grid
+                       if 0 <= self.x <= 603 and 0 <= self.y <= 603:
                            self.click(self.x, self.y)
 
-                           # clear previous underline if it exists
+                           # remove old underline
                            if self.prev_row is not None and self.prev_col is not None:
                                px = (self.prev_col - 1) * 67
                                py = (self.prev_row - 1) * 67
-                               pygame.draw.line(screen, "light blue", (px + 15, py + 58), (px + 52, py + 58), 2)
+                               pygame.draw.line(screen, "light blue", (px + 15, py + 58),
+                                                (px + 52, py + 58), 2)
 
-                           # update previous selection
                            self.prev_row = self.row
                            self.prev_col = self.col
 
-                           # draw underline under new selected cell
                            self.underline_cell(screen)
+
+                   elif event.type == pygame.KEYDOWN:
+                       # Only allow numbers 1-9
+                       if event.key == pygame.K_1:
+                           self.sketch_value = 1
+                       elif event.key == pygame.K_2:
+                           self.sketch_value = 2
+                       elif event.key == pygame.K_3:
+                           self.sketch_value = 3
+                       elif event.key == pygame.K_4:
+                           self.sketch_value = 4
+                       elif event.key == pygame.K_5:
+                           self.sketch_value = 5
+                       elif event.key == pygame.K_6:
+                           self.sketch_value = 6
+                       elif event.key == pygame.K_7:
+                           self.sketch_value = 7
+                       elif event.key == pygame.K_8:
+                           self.sketch_value = 8
+                       elif event.key == pygame.K_9:
+                           self.sketch_value = 9
+                       elif event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
+                           self.sketch_value = ''  # Allow clearing a cell
+
+                       if event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
+                           #prevents from crashing if nothing is selected
+                           if getattr(self, "row", None) is None:
+                               self.row = 1
+                           if getattr(self, "col", None) is None:
+                               self.col = 1
+
+                           # deletes previous underline
+                           if self.prev_row is not None and self.prev_col is not None:
+                               old_px = (self.prev_col - 1) * 67
+                               old_py = (self.prev_row - 1) * 67
+                               pygame.draw.line(self.screen, "light blue", (old_px + 15, old_py + 58),
+                                                (old_px + 52, old_py + 58), 2)
+
+                           # update cursor position
+                           if event.key == pygame.K_UP:
+                               self.row = max(1, self.row - 1)
+                           elif event.key == pygame.K_DOWN:
+                               self.row = min(9, self.row + 1)
+                           elif event.key == pygame.K_LEFT:
+                               self.col = max(1, self.col - 1)
+                           elif event.key == pygame.K_RIGHT:
+                               self.col = min(9, self.col + 1)
+
+                           # new underline
+                           new_px = (self.col - 1) * 67
+                           new_py = (self.row - 1) * 67
+                           pygame.draw.line(self.screen, "red", (new_px + 15, new_py + 58), (new_px + 52, new_py + 58),
+                                            2)
+
+                           # update prev trackers
+                           self.prev_row = self.row
+                           self.prev_col = self.col
+
                            pygame.display.update()
-                           if self.puzzle[self.row - 1][self.col - 1] != 0:
-                               print("Cannot delete a puzzle number.")
-                               continue
-                           if array[(self.row) - 1][(self.col) - 1] != '':
-                               want_to_delete = input("do you want to delete, y/n: ")
-                               if want_to_delete == "y":
-                                   delete_val = True
-                               elif want_to_delete == "n":
-                                   delete_val = False
-                               if delete_val == True:
-                                   px = (self.col - 1) * 67 + 33  # correct cell center X
-                                   py = (self.row - 1) * 67 + 33  # correct cell center Y
-                                   my_rectangle_clear = pygame.Rect(px - 20, py - 20, 50, 50)
-                                   pygame.draw.rect(screen, "Light blue", my_rectangle_clear)
-                                   array[(self.row) - 1][(self.col) - 1] = ''
+                           continue
 
-                           elif array[self.row - 1][self.col - 1] == '':
-                               value = int(input("value: "))
+                       # Place the number if a cell is selected
+                       if self.row is not None and self.col is not None:
+                           if self.puzzle[self.row - 1][
+                               self.col - 1] == 0:  # Only allow change if not a puzzle number
+                               array[self.row - 1][self.col - 1] = self.sketch_value
+                               self.place_number(self.sketch_value, self.col, self.row)
 
-                               self.place_number(value, self.col, self.row)
-                               array[self.row - 1][self.col - 1] = value
-                               # Check if correct number
+                               # Check win/loss
                                result = self.check_win_loss()
-
                                if result == "win":
                                    pygame.display.quit()
                                    Board(603, 810, 3).screen()
-
                                elif result == "loss":
                                    pygame.display.quit()
                                    Board(603, 810, 4).screen()
 
-
-
-                       elif self.x >= 10 and self.x <= 196 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       elif self.x >= 407 and self.x <= 593 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       elif self.x >= 206 and self.x <= 397 and self.y >= 680 and self.y <= 740:
-                           self.window_select(self.x, self.y)
-                       pygame.display.update()
-
-
                pygame.display.update()
            clock.tick(60)
-
-
-
 
        elif self.window == 3:
            #game won
@@ -800,8 +875,6 @@ class Board:
                        self.select()
                        self.window_select(self.x, self.y)
 
-
-
                pygame.display.update()
 
 
@@ -811,12 +884,10 @@ class Board:
            screen_width = 810
            screen_height = 810
 
-
            screen = pygame.display.set_mode((810, 810))
            my_rectangle_exit_red = pygame.Rect((810 // 2) - 120, 810 - 200, 240, 90)
            my_rectangle_exit_white = pygame.Rect((810 // 2) - 115, 810 - 195, 230, 80)
            my_rectangle_exit_orange = pygame.Rect((810 // 2) - 110, 810 - 190, 220, 70)
-
 
            clock = pygame.time.Clock()
            pygame.display.set_caption("Pygame Text Example")
@@ -855,4 +926,3 @@ class Board:
                pygame.display.update()
 
            clock.tick(60)
-
